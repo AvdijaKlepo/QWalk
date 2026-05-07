@@ -1,10 +1,4 @@
-/// HTTP and WebSocket route handlers.
-///
-/// Routes:
-///   GET  /api/status          — current snapshot (JSON, one-shot)
-///   POST /api/topology        — change topology  { kind: "grid", side: 6 }
-///   POST /api/speed           — change tick ms   { tick_ms: 200 }
-///   GET  /ws                  — WebSocket stream of Snapshot JSON
+
 
 use axum::{
     extract::{
@@ -19,18 +13,18 @@ use tracing::{debug, info, warn};
 
 use crate::engine::{Engine, TopologyKind};
 
-// ── Shared application state ──────────────────────────────────────────────────
+
 
 pub type AppState = Engine;
 
-// ── GET /api/status ───────────────────────────────────────────────────────────
+
 
 pub async fn get_status(State(engine): State<AppState>) -> impl IntoResponse {
     let snap = engine.current_snapshot().await;
     Json(snap)
 }
 
-// ── POST /api/topology ────────────────────────────────────────────────────────
+
 
 #[derive(Debug, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
@@ -70,7 +64,6 @@ pub async fn post_topology(
     (StatusCode::OK, Json(Ack { ok: true, message: "topology updated".into() }))
 }
 
-// ── POST /api/speed ───────────────────────────────────────────────────────────
 
 #[derive(Debug, Deserialize)]
 pub struct SpeedRequest { pub tick_ms: u64 }
@@ -89,7 +82,7 @@ pub async fn post_speed(
     (StatusCode::OK, Json(Ack { ok: true, message: format!("tick set to {}ms", req.tick_ms) }))
 }
 
-// ── GET /ws  (WebSocket upgrade) ──────────────────────────────────────────────
+
 
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
@@ -103,7 +96,7 @@ async fn handle_ws(mut socket: WebSocket, engine: Engine) {
     let mut rx = engine.subscribe();
 
     // Send the current state immediately so the client doesn't wait for the
-    // next tick before showing anything.
+ 
     let initial = engine.current_snapshot().await;
     if let Ok(json) = serde_json::to_string(&initial) {
         if socket.send(Message::Text(json.into())).await.is_err() {
@@ -113,7 +106,7 @@ async fn handle_ws(mut socket: WebSocket, engine: Engine) {
 
     loop {
         tokio::select! {
-            // New snapshot from the engine tick loop.
+   
             result = rx.recv() => {
                 match result {
                     Ok(snap) => {

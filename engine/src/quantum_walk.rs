@@ -1,15 +1,8 @@
-/// Discrete-time quantum walk on an undirected graph.
-///
-/// State space: ℂ^(|E| * 2) — one amplitude per directed edge (u→v and v→u).
-/// Coin operator : Grover diffusion coin applied per vertex.
-/// Shift operator: moves amplitude along each directed edge.
-///
-/// After each step the per-node probability is the sum of squared amplitudes
-/// of all directed edges that *arrive* at that node.
+
 
 use std::collections::HashMap;
 
-// ── Complex number (f64 real / imaginary) ────────────────────────────────────
+
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Complex {
@@ -33,13 +26,12 @@ impl Complex {
     fn scale(self, s: f64) -> Self { Self { re: self.re * s, im: self.im * s } }
 }
 
-// ── Graph ─────────────────────────────────────────────────────────────────────
 
-/// Undirected edge stored as (min, max) for deduplication.
+
 #[derive(Clone, Debug)]
 pub struct Graph {
     pub node_count: usize,
-    /// Adjacency list: neighbours[u] = list of v where edge (u,v) exists.
+
     pub neighbours: Vec<Vec<usize>>,
 }
 
@@ -59,7 +51,7 @@ impl Graph {
         }
     }
 
-    /// Degree of node u.
+  
     pub fn degree(&self, u: usize) -> usize { self.neighbours[u].len() }
 }
 
@@ -76,8 +68,7 @@ pub struct QuantumWalk {
 }
 
 impl QuantumWalk {
-    /// Initialise with a uniform superposition over all directed edges
-    /// departing from `start_node`.
+ 
     pub fn new(graph: Graph, start_node: usize) -> Self {
         let mut amplitude: HashMap<(usize, usize), Complex> = HashMap::new();
         let deg = graph.degree(start_node);
@@ -90,7 +81,7 @@ impl QuantumWalk {
         Self { graph, amplitude, step: 0 }
     }
 
-    /// One full step: Coin ∘ Shift.
+  
     pub fn step(&mut self) {
         // 1. Coin — Grover diffusion at each vertex.
         //    For each vertex u, collect all incoming amplitudes (w → u),
@@ -103,7 +94,7 @@ impl QuantumWalk {
             let d = neighbours.len();
             if d == 0 { continue; }
 
-            // Sum of all amplitudes currently at u (i.e. directed edges  * → u).
+          
             let sum: Complex = neighbours
                 .iter()
                 .filter_map(|&w| self.amplitude.get(&(w, u)).copied())
@@ -119,28 +110,13 @@ impl QuantumWalk {
             }
         }
 
-        // 2. Shift — move each amplitude along its edge: (u→v) becomes (v→u)?
-        //    Standard edge-flip shift: S|u,v⟩ = |v,u⟩ ... wait, that would
-        //    just swap. The correct shift for a graph walk:
-        //    S maps amplitude on (u→v) to (u→v) after coin, meaning the
-        //    walker physically moves: amplitude that was "at u heading to v"
-        //    is now "at v heading back or continuing."
-        //
-        //    We use the standard formulation:
-        //      after shift, the amplitude on directed edge (u→v) receives
-        //      the coined amplitude that was on (v→u), i.e. the walker
-        //      at v heading toward u is now at u heading toward v? No —
-        //
-        //    Correct standard shift for DTQWs on graphs:
-        //      S|u,v⟩ = |v,u⟩  (flip the direction, walker moves from u to v)
-        //    So the new amplitude on (v,u) = coined amplitude on (u,v).
+      
 
         let mut shifted: HashMap<(usize, usize), Complex> =
             HashMap::with_capacity(coined.len());
 
         for (&(u, v), &amp) in &coined {
-            // The walker on edge u→v after the coin now moves to v,
-            // and the new edge state is v←u (i.e. key (v,u)).
+      
             shifted.insert((v, u), amp);
         }
 
@@ -155,7 +131,7 @@ impl QuantumWalk {
         for (&(_, v), amp) in &self.amplitude {
             probs[v] += amp.norm_sq();
         }
-        // Normalise to [0,1] relative to max (for display purposes).
+       
         let max = probs.iter().cloned().fold(0.0f64, f64::max);
         if max > 0.0 {
             for p in &mut probs { *p /= max; }
@@ -163,7 +139,7 @@ impl QuantumWalk {
         probs
     }
 
-    /// Raw (un-normalised) probabilities — useful for logging / debugging.
+
     pub fn raw_probabilities(&self) -> Vec<f64> {
         let n = self.graph.node_count;
         let mut probs = vec![0.0f64; n];
@@ -174,9 +150,8 @@ impl QuantumWalk {
     }
 }
 
-// ── Preset topologies ─────────────────────────────────────────────────────────
 
-/// n×n grid graph.
+
 pub fn grid_graph(n: usize) -> Graph {
     let mut g = Graph::new(n * n);
     for row in 0..n {
@@ -189,7 +164,7 @@ pub fn grid_graph(n: usize) -> Graph {
     g
 }
 
-/// Random-ish cycle + chords (small-world feel, deterministic).
+
 pub fn ring_graph(n: usize, chord_step: usize) -> Graph {
     let mut g = Graph::new(n);
     for i in 0..n {

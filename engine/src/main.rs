@@ -27,7 +27,7 @@ async fn main() {
     // ── Engine ────────────────────────────────────────────────────────────────
     let config = EngineConfig::default(); // 6×6 grid, 120ms tick
     let engine = Engine::new(config);
-    engine.start(); // spawns the background tick loop
+    engine.start(); 
 
     // ── CORS (allow SvelteKit dev server) ─────────────────────────────────────
     let cors = CorsLayer::new()
