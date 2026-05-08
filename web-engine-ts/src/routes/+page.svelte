@@ -1,6 +1,8 @@
 <script>
 	import EngineControls from "$lib/components/EngineControls.svelte";
 	import QuantumGrid from "$lib/components/QuantumGrid.svelte";
+	import StatusBar from "$lib/components/StatusBar.svelte";
+
     import { engine } from '$lib/engine/engine.svelte';
 	const probabilities = $derived(engine.snapshot?.probabilities ?? []);
     const topology      = $derived(engine.current?.topology ?? null);
@@ -23,12 +25,22 @@
             <span class="logo-mark">⬡</span>
             <h1>QWalk <span class="subtitle">ENGINE</span></h1>
         </div>
+        <StatusBar
+        connected={engine.connected}
+        step = {engine.snapshot?.step}
+        nodeCount = {engine.snapshot?.node_count}
+        tickMs = {engine.snapshot?.tick_ms}
+        reconnectCount = {engine.reconnectCount}
+        
+        ></StatusBar>
     </header>
     <div class="body">
 
     <!-- Visualisation panel -->
     <section class="vis-panel">
       <p class="panel-label">QUANTUM WALK — NODE PROBABILITY FIELD</p>
+
+     
 
       {#if probabilities.length > 0}
         <QuantumGrid

@@ -9,6 +9,7 @@
 
     <span class="divider">|</span>
     <span class="metric">STEP <strong>{step.toLocaleString()}</strong></span>
+   
 
     <span class="divider">|</span>
     <span class="metric">NODES <strong>{nodeCount}</strong></span>
