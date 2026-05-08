@@ -3,13 +3,13 @@
 	import { toErrorMessage } from "$lib/types/errorMessage";
 
 
-    let selectedTopology = 'grid';
-    let gridSide = 6;
-    let ringNodes = 20;
-    let ringChord = 3;
-    let tickMs = 120;
-    let busy = false;
-    let message = '';
+    let selectedTopology =$state('grid');
+    let gridSide = $state(6);
+    let ringNodes = $state(20);
+    let ringChord = $state(3);
+    let tickMs = $state(120);
+    let busy = $state(false);
+    let message = $state('');
 
     async function applyTopology() {
         busy = true;
@@ -18,8 +18,11 @@
             let res;
             if (selectedTopology === 'grid') {
                 res = await setTopology('grid', { side: Number(gridSide) });
+               
             } else {
                 res = await setTopology('ring', {nodes: Number(ringNodes), chord_step: Number(ringChord) });
+               
+
             }
             message = res.message;
         } catch (error) {
@@ -47,14 +50,14 @@
     <h2 class="controls-title">Engine Controls</h2>
 
     <section class="control-group">
-        <label class="label">Topology</label>
+        <label for="" class="label">Topology</label>
         <div class="radio-row">
             <label for="" class="radio-label">
-                <input type="radio" bind:group={selectedTopology} value="grid">
+                <input type="radio" bind:group={selectedTopology} value="grid" >
                 Grid
             </label>
             <label for="" class="radio-label">
-                <input type="radio" bind:group={selectedTopology} value="ring">
+                <input type="radio" bind:group={selectedTopology} value="ring" >
                 Ring
             </label>
         </div>
